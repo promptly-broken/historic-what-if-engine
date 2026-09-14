@@ -1,3 +1,7 @@
+<img width="1725" height="957" alt="image" src="https://github.com/user-attachments/assets/15ddab56-4892-4422-bcc5-8cc7e2a45d13" />
+
+
+
 # Historic What-If: Dynamic Narrative Engine
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
