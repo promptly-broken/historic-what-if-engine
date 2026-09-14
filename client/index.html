@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historic What-If: Dynamic Narrative Engine</title>
+    <meta name="description" content="Alter the timeline of famous historical events through dialogue and psychological influence in this local MLX-powered game.">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app-wrapper">
+    <!-- Leftmost Nav Rail -->
+    <nav class="nav-rail" aria-label="Main Navigation">
+        <div class="brand-crest" title="Legacy of the Ages" onclick="openModal()">⚔️</div>
+        
+        <div class="nav-tabs">
+            <button class="nav-tab active" title="Chronicle" onclick="closeModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                </svg>
+                <span>Chronicle</span>
+            </button>
+            
+            <button class="nav-tab" title="Select Historical Scenario" onclick="openModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
+                    <line x1="8" y1="2" x2="8" y2="18"/>
+                    <line x1="16" y1="6" x2="16" y2="22"/>
+                </svg>
+                <span>Scenarios</span>
+            </button>
+            
+            <button class="nav-tab" title="Restart Scenario Timeline" onclick="resetTimeline()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <polyline points="1 4 1 10 7 10"/>
+                    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                </svg>
+                <span>Reset</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Chronicle Sidebar (Story So Far & Dynamic State Meters) -->
+    <aside class="chronicle-sidebar" aria-label="Chronicle & State">
+        <div class="chronicle-header">
+            <h1 class="chronicle-title" id="scenario-title">The Ides of March</h1>
+            <div class="chronicle-sub" id="scenario-subtitle">March 15, 44 BC • Rome, Theatre of Pompey</div>
+        </div>
+
+        <div class="section-label">Story So Far</div>
+        <div class="story-timeline" id="story-timeline">
+            <!-- Timeline events populated dynamically -->
+        </div>
+
+        <!-- Dynamic State Meters -->
+        <div class="state-meters-container">
+            <div class="section-label">Psychological State</div>
+            
+            <div class="state-meter-box meter-gold" id="meter-1-box">
+                <div class="meter-header">
+                    <span class="meter-name" id="meter-1-name">TRUST</span>
+                    <span class="meter-val" id="meter-1-val">65%</span>
+                </div>
+                <div class="meter-bar-track">
+                    <div class="meter-bar-fill" id="meter-1-fill" style="width: 65%;"></div>
+                </div>
+                <span class="meter-subtitle" id="meter-1-sub">Loyalty &amp; Reassurance</span>
+            </div>
+
+            <div class="state-meter-box meter-crimson" id="meter-2-box">
+                <div class="meter-header">
+                    <span class="meter-name" id="meter-2-name">PARANOIA</span>
+                    <span class="meter-val" id="meter-2-val">30%</span>
+                </div>
+                <div class="meter-bar-track">
+                    <div class="meter-bar-fill" id="meter-2-fill" style="width: 30%;"></div>
+                </div>
+                <span class="meter-subtitle" id="meter-2-sub">Suspicion &amp; Urgency</span>
+            </div>
+
+            <div class="persona-status-box">
+                <span class="persona-tag-label">Active Mindset</span>
+                <span class="persona-badge" id="persona-badge">CAESAR ARROGANT</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Dialogue Viewport -->
+    <main class="main-viewport" id="main-viewport" style="background-image: url('assets/caesar_senate_hall.jpg');">
+        <div class="viewport-backdrop"></div>
+
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="header-progress-group">
+                <div class="progress-label-row">
+                    <span id="progress-text">ACT PROGRESS: 20%</span>
+                    <span>TIMELINE DIVERGENCE</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+
+            <div class="header-location-pill" onclick="openModal()" title="Switch historical scenario">
+                <span class="loc-icon">📍</span>
+                <span class="loc-text" id="location-text">Theatre of Pompey</span>
+                <span style="font-size: 10px; color: var(--gold-primary);">▼</span>
+            </div>
+
+            <div class="header-actors">
+                <div class="actor-avatar-group">
+                    <div class="avatar-circle player-avatar" title="Player">P</div>
+                    <span class="avatar-label">Player</span>
+                </div>
+                <div class="actor-avatar-group">
+                    <div class="avatar-circle" id="npc-header-avatar" title="Historical Figure">C</div>
+                    <span class="avatar-label" id="npc-header-name">Julius Caesar</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dialogue Stage -->
+        <div class="dialogue-stage">
+            <div class="dialogue-history" id="chat-history">
+                <!-- Messages populated dynamically -->
+            </div>
+            <div class="thinking-indicator" id="thinking-indicator">Historical figure is weighing your words...</div>
+        </div>
+
+        <!-- Console & Suggestion Chips -->
+        <div class="console-container">
+            <div class="suggestions-row" id="suggestions-row">
+                <!-- Dynamic suggestion action chips -->
+            </div>
+
+            <div class="input-bar">
+                <input type="text" id="user-input" placeholder="Speak, counsel the leader, or alter the course of history..." autocomplete="off">
+                <button class="speak-btn" id="send-btn">
+                    <span>Speak</span>
+                    <span>✍️</span>
+                </button>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Scenario Selector Modal -->
+<div class="modal-overlay" id="scenarios-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Select Historical Flashpoint</h2>
+            <button class="close-btn" onclick="closeModal()" title="Close">&times;</button>
+        </div>
+        <div class="scenarios-grid" id="scenarios-grid">
+            <!-- 10 Scenario cards populated dynamically -->
+        </div>
+    </div>
+</div>
+
+<script src="app.js?v=6"></script>
+</body>
+</html>
