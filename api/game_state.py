@@ -262,7 +262,8 @@ class GameStateManager:
             "1. Directly debate, challenge, answer, or act upon the Player's exact counsel in the recent dialogue.\n"
             "2. Ground your speech in historical reality, citing real names, places, weapons, and beliefs.\n"
             "3. Let your tone reflect your internal psychological state (fear, arrogance, suspicion, honor).\n"
-            "4. Never repeat canned formulas or clichés. Speak with living historical conviction."
+            "4. Never repeat canned formulas or clichés. Speak with living historical conviction.\n"
+            "5. Deliver a complete response within 2-3 focused paragraphs. Always conclude with complete sentences."
         )
 
         state_str = "\n".join([f"- {k}: {v}/100" for k, v in self.state.items()])

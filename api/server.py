@@ -209,7 +209,7 @@ def chat(request: ChatRequest):
             model,
             tokenizer,
             prompt=formatted_prompt,
-            max_tokens=220,
+            max_tokens=450,
             sampler=make_sampler(temp=0.7),
             verbose=False
         )
@@ -223,6 +223,12 @@ def chat(request: ChatRequest):
         # Remove any lingering "NPC:" prefix
         if npc_response.startswith("NPC:"):
             npc_response = npc_response[4:].strip()
+
+        # Guardrail against trailing incomplete sentences if generation ever caps out
+        if npc_response and npc_response[-1] not in {'.', '!', '?', '"', "'", '”'}:
+            last_punct = max(npc_response.rfind('.'), npc_response.rfind('!'), npc_response.rfind('?'))
+            if last_punct > 50:
+                npc_response = npc_response[:last_punct + 1].strip()
     else:
         # Simulation fallback
         npc_response = f"[{gsm.speaker_name} considers your words deeply]: {rationale} We shall deliberate further on this course."
