@@ -999,7 +999,7 @@ SCENARIOS = {
                     {
                         "badge": "CONFRONT GROMYKO",
                         "label": "Confront Soviet Foreign Minister Gromyko in the Oval Office",
-                        "prompt": "Summon Foreign Minister Gromyko to the Oval Office. Show him the aerial photographs and give Moscow a forty-eight-hour ultimatum."
+                        "prompt": "Mr. President, summon Foreign Minister Gromyko to the Oval Office. Show him the aerial photographs and give Moscow a forty-eight-hour ultimatum."
                     }
                 ]
             },

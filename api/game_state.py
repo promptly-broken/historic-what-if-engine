@@ -180,8 +180,8 @@ class GameStateManager:
 
     def add_turn(self, player_text: str, npc_text: str):
         """Records a full conversational exchange."""
-        self.dialogue_history.append({"speaker": "Player", "text": player_text})
-        self.dialogue_history.append({"speaker": "NPC", "text": npc_text})
+        self.dialogue_history.append({"speaker": "Player (Advisor)", "text": player_text})
+        self.dialogue_history.append({"speaker": self.speaker_name, "text": npc_text})
         self.turn_count += 1
         
         # Maintain sliding window
@@ -259,11 +259,12 @@ class GameStateManager:
             f"CURRENT DRAMATIC STAGE: {act_info['name']} — {act_info['event']}\n"
             f"BANNED CONCEPTS: {self.scenario_config.get('banned', '')}\n"
             "MANDATORY INSTRUCTIONS:\n"
-            "1. Directly debate, challenge, answer, or act upon the Player's exact counsel in the recent dialogue.\n"
-            "2. Ground your speech in historical reality, citing real names, places, weapons, and beliefs.\n"
-            "3. Let your tone reflect your internal psychological state (fear, arrogance, suspicion, honor).\n"
-            "4. Never repeat canned formulas or clichés. Speak with living historical conviction.\n"
-            "5. Deliver a complete response within 2-3 focused paragraphs. Always conclude with complete sentences."
+            f"1. CONVERSATIONAL AUDIENCE: You are {self.speaker_name}. You are speaking directly to the Player (your trusted counselor or cabinet advisor seated with you in {self.location}). Address the Player directly (e.g., debate their counsel, weigh their proposed risks, or deliver your executive orders to them). Third parties mentioned (e.g. foreign ministers, opposing rulers, distant generals) are NOT in the room—do not address them as if they are present.\n"
+            "2. ANTI-PARROTING MANDATE: NEVER repeat, echo, or parrot the Player's opening words, sentences, or phrasing. Do not begin your response by reciting what the Player just advised. Jump immediately into your own independent tactical analysis, objections, strategic doubts, or decisive decree.\n"
+            "3. Ground your speech in historical reality, citing real names, places, weapons, and beliefs.\n"
+            "4. Let your tone reflect your internal psychological state (fear, arrogance, suspicion, honor).\n"
+            "5. Never repeat canned formulas or clichés. Speak with living historical conviction.\n"
+            "6. Deliver a complete response within 2-3 focused paragraphs. Always conclude with complete sentences."
         )
 
         state_str = "\n".join([f"- {k}: {v}/100" for k, v in self.state.items()])
@@ -271,10 +272,10 @@ class GameStateManager:
 
         dialogue_str = ""
         for turn in self.dialogue_history[-4:]:
-            dialogue_str += f"{turn['speaker']}: {turn['text']}\n"
+            dialogue_str += f"{turn['speaker']}: {turn['text']}\n\n"
         
         # Include current player turn explicitly!
-        dialogue_str += f"Player: {current_player_text}\n"
+        dialogue_str += f"Player (Advisor): {current_player_text}\n"
 
         prompt_block = f"""[WORLD & PSYCHOLOGICAL STATE]
 {state_str}
@@ -286,7 +287,11 @@ class GameStateManager:
 {story_str}
 
 [RECENT DIALOGUE]
-{dialogue_str}NPC: """
+{dialogue_str}
+[YOUR TASK]
+Respond in-character as {self.speaker_name} directly to your advisor (the Player).
+Address their strategic counsel with your own distinct perspective, doubts, or orders.
+CRITICAL: Under no circumstances should you repeat or echo their opening words or phrasing."""
 
         return system_prompt, prompt_block
 

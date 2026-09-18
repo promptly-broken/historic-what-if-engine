@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from typing import Optional, Dict, Any, List
 import os
 import sys
+import re
 
 # Ensure dynamic_npc_engine directory is in path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -50,6 +51,52 @@ OPENING_LINES = {
     "franz_ferdinand": "A morning grenade will not keep me from my duty to the wounded officers. Chauffeur, guide us along the quay!",
     "cuban_missile_crisis": "The U-2 reconnaissance photos leave no doubt—nuclear launch sites in San Cristóbal. The Joint Chiefs urge an immediate air strike."
 }
+
+def strip_player_echo(player_text: str, npc_response: str) -> str:
+    """
+    Guardrail to detect and strip opening sentences from npc_response that
+    mirror or echo sentences in player_text.
+    """
+    if not player_text or not npc_response:
+        return npc_response
+        
+    p_sents = [s.strip() for s in re.split(r'[.!?]+', player_text) if s.strip()]
+    if not p_sents:
+        return npc_response
+
+    current_response = npc_response.strip()
+    
+    for p_sent in p_sents:
+        p_words = re.findall(r'\b\w+\b', p_sent.lower())
+        if len(p_words) < 3:
+            continue
+            
+        r_splits = re.split(r'([.!?]+(?:\s+|$))', current_response)
+        if len(r_splits) < 3:
+            break
+            
+        r_first = r_splits[0].strip()
+        r_words = re.findall(r'\b\w+\b', r_first.lower())
+        if len(r_words) < 3:
+            break
+            
+        prefix_len = min(4, len(p_words))
+        prefix_match = (len(p_words) >= 3 and p_words[:prefix_len] == r_words[:prefix_len])
+        
+        set_p = set(p_words)
+        set_r = set(r_words)
+        overlap = len(set_p & set_r) / max(len(set_p), 1)
+        
+        if prefix_match or (overlap >= 0.65 and len(p_words) >= 4):
+            remaining = "".join(r_splits[2:]).strip()
+            if len(remaining) > 30:
+                current_response = remaining
+            else:
+                break
+        else:
+            break
+            
+    return current_response
 
 def get_or_create_session(scenario_id: str) -> GameStateManager:
     global current_scenario_id
@@ -220,9 +267,21 @@ def chat(request: ChatRequest):
             npc_response = npc_response.split("<|im_start|>assistant")[-1]
         npc_response = npc_response.replace("<|im_end|>", "").strip()
         
-        # Remove any lingering "NPC:" prefix
-        if npc_response.startswith("NPC:"):
-            npc_response = npc_response[4:].strip()
+        # Remove any lingering speaker or role prefixes
+        prefixes_to_strip = [
+            f"{gsm.speaker_name}:",
+            "NPC:",
+            "Assistant:",
+            f"President {gsm.speaker_name}:",
+            f"{gsm.speaker_name} (Advisor):",
+            "Response:"
+        ]
+        for prefix in prefixes_to_strip:
+            if npc_response.lower().startswith(prefix.lower()):
+                npc_response = npc_response[len(prefix):].strip()
+
+        # Guardrail against verbatim echoing of player's opening counsel
+        npc_response = strip_player_echo(player_text, npc_response)
 
         # Guardrail against trailing incomplete sentences if generation ever caps out
         if npc_response and npc_response[-1] not in {'.', '!', '?', '"', "'", '”'}:

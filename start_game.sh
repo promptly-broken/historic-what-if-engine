@@ -12,9 +12,15 @@ echo "      HISTORIC WHAT-IF: DYNAMIC NARRATIVE ENGINE                 "
 echo "=================================================================="
 
 # Check for Python Virtual Environment
-if [ -f ".venv/bin/python" ]; then
+if [ -n "$VIRTUAL_ENV" ] && [ -f "$VIRTUAL_ENV/bin/python" ]; then
+    PYTHON="$VIRTUAL_ENV/bin/python"
+    UVICORN="$VIRTUAL_ENV/bin/uvicorn"
+elif [ -f ".venv/bin/python" ]; then
     PYTHON=".venv/bin/python"
     UVICORN=".venv/bin/uvicorn"
+elif [ -f "../dynamic_npc_engine/.venv/bin/python" ]; then
+    PYTHON="../dynamic_npc_engine/.venv/bin/python"
+    UVICORN="../dynamic_npc_engine/.venv/bin/uvicorn"
 elif command -v python3 &> /dev/null; then
     PYTHON="python3"
     UVICORN="uvicorn"
